@@ -1,26 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMailerDto } from './dto/create-mailer.dto';
-import { UpdateMailerDto } from './dto/update-mailer.dto';
+import { SpecificMailDto } from './dto/create-mailer.dto';
+import { MailAllDto } from './dto/sendMailAll.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
-export class MailerService {
-  create(createMailerDto: CreateMailerDto) {
-    return 'This action adds a new mailer';
-  }
+export class IMailerService {
+  constructor(private readonly mailer:MailerService){  }
+  sendMailParticuler(SpecificMailDto: SpecificMailDto) {
+    console.log(process.env.MAIL)
+    console.log(process.env.PASS)
+    return this.mailer.sendMail({
+      to: SpecificMailDto.to,
+      subject: SpecificMailDto.subject,
+      text: SpecificMailDto.body,
+    })
 
-  findAll() {
-    return `This action returns all mailer`;
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} mailer`;
+ sendMailToAll(MailToAllDto:MailAllDto) {
+   return "This send Email to all users"
   }
-
-  update(id: number, updateMailerDto: UpdateMailerDto) {
-    return `This action updates a #${id} mailer`;
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} mailer`;
-  }
-}
