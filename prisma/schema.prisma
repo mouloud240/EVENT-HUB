@@ -9,6 +9,46 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url = "file:./dev.db"
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model user{
+  name String  
+  email  String @unique
+  id String @id@default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  events event[]
+  rsvps rsvp[]
+  @@index([email])
+}
+model event{
+  name String
+  description String
+  id String @id@default(uuid())
+  location String
+  capacity Int
+  date DateTime
+  UserId String 
+  createdBy user @relation(fields: [UserId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  rsvps rsvp[]
+  @@index([name,UserId])
+}
+model rsvp{
+  id String @id@default(uuid())
+  UserId String
+  EventId String
+  user user @relation(fields: [UserId], references: [id])
+  event event @relation(fields: [EventId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  status rsvpStatus @default(PENDING) 
+  @@index([UserId,EventId])
+}
+enum rsvpStatus{
+  PENDING
+  ACCEPTED
+  REJECTED
 }
