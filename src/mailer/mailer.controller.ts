@@ -14,6 +14,8 @@ export class MailerController {
     return this.mailerService.sendMailParticuler(SpecificMailDto);
   }
 
+  @ApiProperty({description:"Send mail to all users"})
+  @ApiResponse({status:201,description:"Mail Properties"})
   @Post('all')
   sendMailToAll(@Body() mailAlldto:MailAllDto) {
     return this.mailerService.sendMailToAll(mailAlldto);

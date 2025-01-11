@@ -11,7 +11,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResInterceptor())
   const config=new DocumentBuilder().setTitle('EVENTHUB').setDescription('The EVENTHUB API description').setVersion('1').addTag('EVENTHUB').build();
   const document=SwaggerModule.createDocument(app,config);
-  SwaggerModule.setup('api',app,document);
+  SwaggerModule.setup('docs',app,document);
 
   await app.listen(process.env.PORT ?? 3000);
 }
