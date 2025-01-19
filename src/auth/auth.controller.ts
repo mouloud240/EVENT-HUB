@@ -1,34 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { localGuard } from "./guards/local.guard";
+import { currenUser } from "./decorators/getUser.decorator";
+import { user } from "@prisma/client";
+import { AuthService } from "./auth.service";
+import { jwtGuard } from "./guards/jwt.guard";
+import { loginReqDto } from "./dto/login.req.dto";
+import { googleGuard } from "./guards/google.guard";
 
 @Controller('auth')
+
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  constructor(private readonly authServices:AuthService){}
+  @Post('login')
+  @UseGuards(localGuard)
+  login(@currenUser() user:user, @Body() body:loginReqDto){
+    return this.authServices.login(user);
+  }
+  @Post('refresh')
+  refreshToken(@Body() body:{refreshToken:string}){
+    return this.authServices.validateRefreshToken(body.refreshToken)
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Get('protected')
+  @UseGuards(jwtGuard)
+  getProtected(@currenUser() user:user){
+    return user;
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Get('google/login')
+  @UseGuards(googleGuard)
+  googleLogin(){}
+  @Get ('google/redirect')
+  @UseGuards(googleGuard)
+  googleRedirect(@Req() req){
+    return req.user
   }
 }
