@@ -11,13 +11,11 @@ export class SessionSerializer extends PassportSerializer {
   }
 
   serializeUser(user: user, done: (err: Error, id: number) => void) {
-    // Serialize only the user ID into the session
     done(null,+user.id);
   }
 
-  async deserializeUser(id: string, done: (err: Error, user: user) => void) {
-    // Fetch the user from the database using the ID
-    const user = await this.userService.findOne(id);
+  async deserializeUser(id: string, done: (err: Error, user: user) => user) {
+    const user = await this.userService.findByGoogleId(id.toString());
     done(null, user);
   }
 }

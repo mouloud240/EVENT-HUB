@@ -31,7 +31,7 @@ export class AuthController {
   googleLogin(){}
   @Get ('google/redirect')
   @UseGuards(googleGuard)
-  googleRedirect(@Req() req){
-    return req.user
-  }
+  googleRedirect(@Req() req:any){
+    
+    return this.authServices.googleLogin(req.user)  }
 }

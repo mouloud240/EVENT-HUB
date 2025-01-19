@@ -1,12 +1,32 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException,  HttpStatus,  Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { prismaService } from 'src/db/prisma.service';
 import * as bcrypt from "bcrypt"
-import { PrismaClientValidationError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+import { Profile } from 'passport-google-oauth20';
 @Injectable()
 export class UsersService {
+
   constructor(private readonly db:prismaService){}
+  async  createGoogleUser(user: Profile) {
+    try{
+      return await this.db.user.create({
+        data:{
+          email:user.emails[0].value,
+          name:user.displayName,
+          googleId:user.id,
+          password:""
+        }
+      })
+    }
+    catch(e){
+      if (e instanceof PrismaClientKnownRequestError){
+        throw new HttpException("user already exist please login using your email and password or try to reset your password",HttpStatus.EXPECTATION_FAILED)
+      }
+      throw new HttpException(e,HttpStatus.BAD_REQUEST)
+    }
+  }
   async create(createUserDto: CreateUserDto) {
     const user={...createUserDto}  
     try {
@@ -98,6 +118,19 @@ try  {     const userData={...updateUserDto}
       throw new HttpException(e,HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+  async findByGoogleId(googleId:string){
+    try{
+    return this.db.user.findFirst({
+      where:{
+        googleId:googleId
+      }
+    })
+    }catch(e){
+      console.error('I am a cool error')
+      throw new HttpException(e,HttpStatus.BAD_REQUEST)
+    }
+  }
+
   
 }
 

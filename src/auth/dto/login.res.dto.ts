@@ -1,7 +1,10 @@
 import { user } from "@prisma/client";
+import { IsString } from "class-validator";
 
-export interface LoginResDto {
+export class LoginResDto {
+  @IsString()
   AccessToken: string;
-  RefreshToken: string;
-  user:user
+  @IsString()
+  RefreshToken: string; 
+  user:Omit<user,'password'>
  }
