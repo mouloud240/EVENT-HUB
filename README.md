@@ -1,3 +1,233 @@
+## Conception Document
+
+### 1. **Overview**
+
+**EventHub** is a lightweight platform that enables users to create, manage, and discover local events. Designed for community groups and small organizations, EventHub simplifies event coordination and participant management.
+
+---
+
+### 2. **System Architecture**
+
+### **Tech Stack**:
+
+- **Backend**: NestJS (Node.js framework)
+- **Database**: PostgreSQL (via Prisma ORM)
+- **Authentication**: JWT with refresh tokens
+- **File Uploads**: Multer for event images
+- **Email Notifications**: Nodemailer
+- **API Documentation**: Swagger
+- **Testing**: Jest
+- **Deployment**: Docker, CI/CD pipeline
+
+### **High-Level Diagram**:
+
+```
+Frontend (Optional)
+    |
+    v
+Backend (NestJS)
+    |
+    v
+Database (PostgreSQL)
+
+```
+
+---
+
+### 3. **Features**
+
+### **3.1. User Authentication**
+
+- **Sign Up/Login**:
+    - Email and password authentication.
+    - Password hashing using Bcrypt.
+- **JWT**:
+    - Access and refresh tokens for authentication.
+
+### **3.2. Event Management**
+
+- Create, update, and delete events.
+- Define event details: name, description, date, location, and capacity.
+- Upload event images.
+
+### **3.3. Event Discovery**
+
+- Search and filter events by name, category, or date.
+- Pagination for improved performance.
+
+### **3.4. RSVP System**
+
+- Users can RSVP to events.
+- Enforce capacity limits.
+- Option to cancel RSVP.
+
+### **3.5. Notifications**
+
+- Email confirmations for RSVPs.
+- Event reminders sent closer to the event date.
+
+### **3.6. API Design**
+
+- **RESTful Endpoints**:
+    - CRUD operations for users, events, and RSVPs.
+    - Authentication endpoints for login, registration, and token refresh.
+- **API Documentation**:
+    - Use Swagger for detailed API specs.
+
+### **3.7. Testing**
+
+- Unit tests for services, controllers, and modules.
+- End-to-end (e2e) tests for RSVP and event workflows.
+
+---
+
+### 4. **Database Design**
+
+### **4.1. Entities**
+
+1. **User**:
+    - id (UUID)
+    - name (string)
+    - email (string, unique)
+    - password (hashed string)
+    - createdAt, updatedAt (timestamps)
+2. **Event**:
+    - id (UUID)
+    - name (string)
+    - description (string)
+    - date (timestamp)
+    - location (string)
+    - capacity (integer)
+    - createdBy (foreign key: User)
+    - createdAt, updatedAt (timestamps)
+3. **RSVP**:
+    - id (UUID)
+    - eventId (foreign key: Event)
+    - userId (foreign key: User)
+    - createdAt (timestamp)
+
+### **4.2. Relationships**
+
+- **User - Event**: One-to-Many (creator).
+- **Event - RSVP**: One-to-Many.
+- **User - RSVP**: One-to-Many.
+
+---
+
+### 5. **Backend Implementation**
+
+### **5.1. Modules**
+
+1. **AuthModule**:
+    - Handles user registration, login, and token generation.
+2. **EventModule**:
+    - CRUD operations for events.
+    - Manage event capacity and RSVP logic.
+3. **RSVPModule**:
+    - Tracks user RSVPs and capacity enforcement.
+
+### **5.2. Middleware**
+
+- **AuthMiddleware**: Validates JWT tokens for protected routes.
+
+### **5.3. Services**
+
+- Handle business logic for event creation, RSVPs, and notifications.
+
+### **5.4. Testing**
+
+- Write unit tests for services and controllers.
+- Integration tests for RSVP and event workflows.
+
+---
+
+### 6. **Deployment Plan**
+
+### **6.1. Docker Configuration**
+
+- Create Dockerfiles for backend and database.
+- Use Docker Compose to orchestrate services.
+
+### **6.2. CI/CD**
+
+- Set up GitHub Actions for automated testing and deployment.
+- Deploy to cloud platforms like AWS, GCP, or Azure.
+
+---
+
+### 7. **Timeline**
+
+### **Week 1(19Jan)**:
+
+- Set up NestJS project structure.
+- Implement user authentication.
+
+### **Week 2**:
+
+- Develop event management module.
+- Set up PostgreSQL with Prisma.
+
+### **Week 3**:
+
+- Implement RSVP module and notifications.
+
+### **Week 4**:
+
+- Write unit and e2e tests.
+- Deploy the application using Docker.
+
+---
+
+### 8. **Future Enhancements**
+
+- Add geolocation for event discovery.
+- Support social sharing of public events.
+- Expand notifications to include SMS reminders.
+
+---
+
+## What to learn:
+
+- Nestjs ecoSystem +prisma
+- Usage of multer
+- Usage of Scheduled Tasks
+- Passport auth
+- Writing unit tests
+- clean code (try to apply some of the stuff in the Data intensive book )
+- usage of react Router in the client side
+
+## Design Brief
+
+**Project Name**: EventHub
+
+**Goal**: Build a lightweight, user-friendly platform for managing and discovering local events with features like RSVP tracking and email notifications.
+
+**Target Audience**: Community groups, local organizations, and event enthusiasts.
+
+**Core Features**:
+
+1. Secure user authentication.
+2. Event creation and management.
+3. RSVP system with capacity enforcement.
+4. Event search and discovery.
+5. Email notifications for RSVPs and reminders.
+
+**Technology Stack**:
+
+- Backend: NestJS
+- Database: PostgreSQL
+- File Uploads: Multer
+- Email Notifications: Nodemailer
+
+**Key Deliverables**:
+
+1. Functional REST API with Swagger documentation.
+2. Fully tested backend modules.
+3. Dockerized application ready for deployment.
+
+**Timeline**: 4 weeks
+
+**Future Potential**: Geolocation, social sharing, SMS reminders.
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
