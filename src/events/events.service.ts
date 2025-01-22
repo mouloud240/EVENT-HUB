@@ -3,7 +3,6 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { prismaService } from 'src/db/prisma.service';
 import { event } from '@prisma/client';
-import { throws } from 'assert';
 import { PaginationDto, PaginationDtoRes } from 'src/rsvp/dto/pagination.dto';
 
 @Injectable()
@@ -32,6 +31,42 @@ export class EventsService {
     try {
       const allEventCount = await this.db.event.count();
       const events = await this.db.event.findMany({
+        include: { createdBy: true },
+        take: paginationDto.limit,
+        skip: (paginationDto.page - 1) * paginationDto.limit,
+      });
+      const returnObj: PaginationDtoRes<event> = {
+        content: events,
+        page: paginationDto.page,
+        limit: paginationDto.limit,
+        totalPages: Math.ceil(allEventCount / paginationDto.limit),
+        totalElements: events.length,
+      };
+      return returnObj;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async findAlluserEvents(uid: string): Promise<Array<event>> {
+    try {
+      return this.db.event.findMany({
+        where: { UserId: uid },
+        include: { createdBy: true },
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async findAllUserEventsPagination(
+    userId: string,
+    paginationDto: PaginationDto,
+  ): Promise<PaginationDtoRes<event>> {
+    try {
+      const allEventCount = await this.db.event.count({
+        where: { UserId: userId },
+      });
+      const events = await this.db.event.findMany({
+        where: { UserId: userId },
         include: { createdBy: true },
         take: paginationDto.limit,
         skip: (paginationDto.page - 1) * paginationDto.limit,
@@ -84,6 +119,22 @@ export class EventsService {
         throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
       }
       return { message: 'Event deleted' };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async removeAllUserEvents(uid: string): Promise<{ message: string }> {
+    try {
+      const deleteResult = await this.db.event.deleteMany({
+        where: { UserId: uid },
+      });
+      if (!deleteResult) {
+        throw new HttpException(
+          'No events found for this user',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      return { message: 'All events deleted' };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

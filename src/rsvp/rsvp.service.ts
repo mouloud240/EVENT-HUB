@@ -4,6 +4,7 @@ import { UpdateRsvpDto } from './dto/update-rsvp.dto';
 import { prismaService } from 'src/db/prisma.service';
 import { rsvp, rsvpStatus } from '@prisma/client';
 import { PaginationDtoRes } from './dto/pagination.dto';
+import { EventRsvpQueryResult } from './interfaces/rsvp';
 interface updateAllprops {
   status: rsvpStatus;
 }
@@ -44,39 +45,69 @@ export class RsvpService {
       throw new HttpException(e, HttpStatus.BAD_REQUEST);
     }
   }
-  async ValidateUserRsvp(eventId: string, userId: string) {
-    const event = await this.db.event.findUnique({
-      where: {
-        id: eventId,
-      },
-      select: {
-        _count: {
-          select: {
-            rsvps: true,
-          },
-        },
-        capacity: true,
-        rsvps: {
-          where: {
-            UserId: userId,
-          },
-        },
-      },
-    });
-    if (!event) {
+
+  async validateUserRsvp(eventId: string, userId: string): Promise<boolean> {
+    //TODO shouldn't be hardcoded but to refactor later
+    const pendingRatioOverCapacity = 2;
+    const event = await this.db.$queryRaw<EventRsvpQueryResult[]>`
+
+    SELECT 
+      e.id AS event_id,
+      e.capacity,
+      COUNT(CASE WHEN r.status = 'PENDING' THEN 1 END) AS pending_rsvps_count,
+      COUNT(CASE WHEN r.status = 'ACCEPTED' THEN 1 END) AS accepted_rsvps_count,
+      COUNT(CASE WHEN r."UserId" = ${userId} THEN 1 END) AS user_rsvp_count
+    FROM 
+      events e
+    LEFT JOIN 
+      rsvps r ON e.id = r."EventId"
+    WHERE 
+      e.id = ${eventId}
+    GROUP BY 
+      e.id, e.capacity;
+  `;
+
+    // Handle cases where the event is not found
+    if (!event || event.length === 0) {
       throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
     }
-    const isEventFull = event.capacity <= event._count.rsvps;
-    if (isEventFull) {
+
+    const eventDetails = event[0]; // Query result is typically an array
+    const {
+      capacity,
+      pending_rsvps_count,
+      accepted_rsvps_count,
+      user_rsvp_count,
+    } = eventDetails;
+
+    const totalRsvps = pending_rsvps_count + accepted_rsvps_count;
+    const isFullDueToAccepted = accepted_rsvps_count >= capacity;
+    //TODO in each of this ifs we should log the error to some loggin service
+    if (isFullDueToAccepted) {
       throw new HttpException('Event is full', HttpStatus.BAD_REQUEST);
     }
-    const isRsvped = event.rsvps.length != 0;
+    const isFullDueToPending =
+      pending_rsvps_count >= capacity &&
+      totalRsvps >= capacity * pendingRatioOverCapacity;
+    if (isFullDueToPending) {
+      throw new HttpException('Event is full', HttpStatus.BAD_REQUEST);
+    }
 
-    return isRsvped;
+    // Check if the user has already RSVPed
+    const isRsvped = user_rsvp_count > 0;
+    if (isRsvped) {
+      throw new HttpException(
+        'User has already RSVPed for this event',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // If all checks pass, return false (user has not RSVPed and can proceed)
+    return false;
   }
   async create(createRsvpDto: CreateRsvpDto, userID: string) {
     try {
-      const canRsvp = await this.ValidateUserRsvp(
+      const canRsvp = await this.validateUserRsvp(
         createRsvpDto.EventId,
         userID,
       );
@@ -124,6 +155,31 @@ export class RsvpService {
     }
   }
   async update(UpdateRsvpDto: UpdateRsvpDto, uid: string) {
+    if (UpdateRsvpDto.status == rsvpStatus.ACCEPTED) {
+      const queryRes = await this.db.event.findUnique({
+        where: { id: UpdateRsvpDto.EventId },
+        select: {
+          capacity: true,
+          _count: {
+            select: { rsvps: { where: { status: rsvpStatus.ACCEPTED } } },
+          },
+        },
+      });
+      const isFullDueToAccepted = queryRes._count.rsvps == queryRes.capacity;
+      if (isFullDueToAccepted) {
+        await this.db.rsvp.deleteMany({
+          where: {
+            EventId: UpdateRsvpDto.EventId,
+            status: { in: [rsvpStatus.PENDING, rsvpStatus.REJECTED] },
+          },
+        });
+        throw new HttpException(
+          'Event is full ' + UpdateRsvpDto.EventId,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
     try {
       const updatedCount = await this.db.rsvp.updateMany({
         where: {

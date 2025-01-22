@@ -98,24 +98,26 @@ export class IMailerService {
         </div>
         <div class="content">
             <p>Dear User,</p>
-            <p>I hope this message finds you well. I am writing to [state the purpose of your email]. Please find the details below:</p>
+            <p>I hope this message finds you well. I am writing to You about ${SpecificMailDto.subject}. Please find the details below:</p>
             <p>
                 <strong>Subject:</strong> ${SpecificMailDto.subject}<br>
                 <strong>Date:</strong> ${new Date()}<br>
                 <strong>Location:</strong> [Location, if applicable]
             </p>
-            <p>If you have any questions or need further information, please feel free to contact me at [your email address] or [your phone number].</p>
+            <p>${SpecificMailDto.body}</p>
             <p>Thank you for your attention to this matter. I look forward to your response.</p>
             <p>Best regards,</p>
             <p>[Mouloud Hasrane]<br>
-            [CEO]<br>
-            [EVENTHUB]<br>
-            [+213696070598]</p>
-            <a href="#" class="button">Call to Action</a>
+            CEO<br>
+            EVENTHUB<br>
+            +213696070598</p>
+${SpecificMailDto.callToAction ? `<a href="${SpecificMailDto.ctaLink}" class="button">${SpecificMailDto.callToAction}</a>` : ''}
         </div>
         <div class="footer">
             <p>You are receiving this email because you are a valued contact of [Your Company Name].</p>
-            <p><a href="#">Unsubscribe</a> | <a href="#">Privacy Policy</a></p>
+            <p><a href="localhost:3000/Unsubscribe/5">Unsubscribe</a> | <a href="#">Privacy Policy</a></p>
+<a href="https://www.instagram.com/mld.rar" > check Our instgram  </a>
+    <p>© 2024 EVENTHUB. All rights reserved.</p>
         </div>
     </div>
 </body>
