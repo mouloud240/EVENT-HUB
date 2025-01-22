@@ -274,6 +274,7 @@ $ pnpm run start:dev
 # production mode
 $ pnpm run start:prod
 ```
+access localhost:3000/docs to check apiDocumenation
 
 ## Run tests
 
