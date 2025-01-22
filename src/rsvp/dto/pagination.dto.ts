@@ -12,3 +12,10 @@ export class PaginationDto{
 
   limit?:number
 }
+export class PaginationDtoRes<T>{
+  content:Array<T>
+  totalElements:number
+  totalPages:number
+  page:number
+  limit:number
+}

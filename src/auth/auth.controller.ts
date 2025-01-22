@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { localGuard } from "./guards/local.guard";
-import { currenUser } from "./decorators/getUser.decorator";
+import { currentUser, } from "./decorators/getUser.decorator";
 import { user } from "@prisma/client";
 import { AuthService } from "./auth.service";
 import { jwtGuard } from "./guards/jwt.guard";
@@ -13,7 +13,7 @@ export class AuthController {
   constructor(private readonly authServices:AuthService){}
   @Post('login')
   @UseGuards(localGuard)
-  login(@currenUser() user:user, @Body() body:loginReqDto){
+  login(@currentUser() user:user, @Body() body:loginReqDto){
     return this.authServices.login(user);
   }
   @Post('refresh')
@@ -23,7 +23,7 @@ export class AuthController {
 
   @Get('protected')
   @UseGuards(jwtGuard)
-  getProtected(@currenUser() user:user){
+  getProtected(@currentUser() user:user){
     return user;
   }
   @Get('google/login')

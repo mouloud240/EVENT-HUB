@@ -28,7 +28,9 @@ model event{
   name String
   description String
   id String @id@default(uuid())
-  location String
+  city String @default("") 
+  long Float @default(0)
+  lat Float @default(0)
   capacity Int
   date DateTime
   UserId String 

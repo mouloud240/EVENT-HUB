@@ -1,26 +1,91 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { prismaService } from 'src/db/prisma.service';
+import { event } from '@prisma/client';
+import { throws } from 'assert';
+import { PaginationDto, PaginationDtoRes } from 'src/rsvp/dto/pagination.dto';
 
 @Injectable()
 export class EventsService {
-  create(createEventDto: CreateEventDto) {
-    return 'This action adds a new event';
+  constructor(private readonly db: prismaService) {}
+  create(createEventDto: CreateEventDto, uid: string): Promise<event> {
+    try {
+      return this.db.event.create({
+        data: { ...createEventDto, UserId: uid },
+      });
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  findAll() {
-    return `This action returns all events`;
+  findAll(): Promise<Array<event>> {
+    try {
+      return this.db.event.findMany({ include: { createdBy: true } });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async findAllPagination(
+    paginationDto: PaginationDto,
+  ): Promise<PaginationDtoRes<event>> {
+    try {
+      const allEventCount = await this.db.event.count();
+      const events = await this.db.event.findMany({
+        include: { createdBy: true },
+        take: paginationDto.limit,
+        skip: (paginationDto.page - 1) * paginationDto.limit,
+      });
+      const returnObj: PaginationDtoRes<event> = {
+        content: events,
+        page: paginationDto.page,
+        limit: paginationDto.limit,
+        totalPages: Math.ceil(allEventCount / paginationDto.limit),
+        totalElements: events.length,
+      };
+      return returnObj;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} event`;
+  async findOne(id: string) {
+    try {
+      const event = await this.db.event.findUnique({
+        where: {
+          id: id,
+        },
+        include: { createdBy: true },
+      });
+      if (!event) {
+        throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+      }
+      return event;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event`;
+  update(id: string, updateEventDto: UpdateEventDto): Promise<event> {
+    try {
+      return this.db.event.update({
+        where: { id: id },
+        data: updateEventDto,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+  async remove(id: string): Promise<{ message: string }> {
+    try {
+      const deleteResult = await this.db.event.delete({ where: { id: id } });
+      if (!deleteResult) {
+        throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+      }
+      return { message: 'Event deleted' };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

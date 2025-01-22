@@ -11,6 +11,8 @@ import { PrismaModule } from './db/prisma.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PassportModule } from '@nestjs/passport';
 import { LoggerMiddleware } from './auth/middlwares/logger.middleware';
+import { SchedulerService } from './scheduler/scheduler.service';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [PassportModule,EventsModule, RsvpModule, UsersModule, IMailerModule, AuthModule,ConfigModule.forRoot(
@@ -20,10 +22,12 @@ import { LoggerMiddleware } from './auth/middlwares/logger.middleware';
   ),
     PrismaModule,
 
- ScheduleModule.forRoot(), 
+ ScheduleModule.forRoot(),
+
+ SchedulerModule, 
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SchedulerService],
 })
 export class AppModule implements NestModule  {
     configure(consumer: MiddlewareConsumer) {
