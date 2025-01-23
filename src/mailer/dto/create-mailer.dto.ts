@@ -19,6 +19,7 @@ export class SpecificMailDto {
   @ValidateIf((o) => o.callToAction != undefined)
   ctaLink?: string;
 }
+//the type below is a represnetation of this type or alteast what it should look lik in the client side
 //refatoring the class to look like the type
 export type SpecificMailDtoType = {
   to: string;

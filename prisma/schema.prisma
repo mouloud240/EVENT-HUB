@@ -22,7 +22,8 @@ model user{
   updatedAt DateTime @default(now())
   events event[]
   rsvps rsvp[]
-  @@index([email])
+  profilePicUrl String?  
+  @@index([email,name])
 }
 model event{
   name String
@@ -34,11 +35,13 @@ model event{
   capacity Int
   date DateTime
   UserId String 
+  coverPic String?
+  detailedPics String[] @default([])
   createdBy user @relation(fields: [UserId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   rsvps rsvp[]
-  @@index([name,UserId])
+  @@index([name,UserId,date])
 }
 model rsvp{
   id String @id@default(uuid())

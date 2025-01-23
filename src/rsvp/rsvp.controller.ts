@@ -11,7 +11,6 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { RsvpService } from './rsvp.service';
 import { CreateRsvpDto } from './dto/create-rsvp.dto';
 import { UpdateRsvpDto } from './dto/update-rsvp.dto';
 import { jwtGuard } from 'src/auth/guards/jwt.guard';
@@ -20,6 +19,7 @@ import { rsvp, rsvpStatus, user } from '@prisma/client';
 import { PaginationDto, PaginationDtoRes } from './dto/pagination.dto';
 import { RsvpEntity } from './entities/rsvp.dto';
 import { currentUser } from 'src/auth/decorators/getUser.decorator';
+import { RsvpService } from './rsvp.service';
 
 //TODO add return types for the deletion
 //TODO crete a specefic dto for pagination that conatins page number limit and the elements

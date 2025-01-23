@@ -31,7 +31,7 @@ export class EventsController {
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Array<event>> {
     return this.eventsService.findAll();
   }
 
@@ -47,16 +47,19 @@ export class EventsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateEventDto: UpdateEventDto,
+  ): Promise<event> {
     return this.eventsService.update(id, updateEventDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.eventsService.remove(id);
   }
   @Delete()
-  deleteAll(@currentUser() user: user) {
+  deleteAll(@currentUser() user: user): Promise<{ message: string }> {
     return this.eventsService.removeAllUserEvents(user.id);
   }
 }

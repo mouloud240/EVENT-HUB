@@ -5,7 +5,7 @@ import { prismaService } from 'src/db/prisma.service';
 import { rsvp, rsvpStatus } from '@prisma/client';
 import { PaginationDtoRes } from './dto/pagination.dto';
 import { EventRsvpQueryResult } from './interfaces/rsvp';
-interface updateAllprops {
+export interface updateAllprops {
   status: rsvpStatus;
 }
 @Injectable()

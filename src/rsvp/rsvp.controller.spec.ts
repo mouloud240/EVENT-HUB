@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RsvpController } from './rsvp.controller';
-import { RsvpService } from './rsvp.service';
+import { RsvpService } from './RsvpService';
 
 describe('RsvpController', () => {
   let controller: RsvpController;
