@@ -42,10 +42,16 @@ export class UsersService {
         data: user,
       });
     } catch (error) {
+      console.log('Sneaky');
       if (error instanceof PrismaClientValidationError) {
         throw new HttpException(error, HttpStatus.BAD_REQUEST);
       }
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new HttpException(
+          'User Already Exist Please login With your Email and Password',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
   }
 

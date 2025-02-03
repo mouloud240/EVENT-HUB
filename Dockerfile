@@ -16,6 +16,7 @@ COPY . .
 
 # Generate Prisma Client code
 RUN npx prisma generate
+RUN npm run build
 
 # Expose the port the app runs on, here, I was using port 3333
 EXPOSE 3000

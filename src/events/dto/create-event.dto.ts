@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsInt,
@@ -25,6 +26,7 @@ export class CreateEventDto {
   @ApiProperty({ description: 'longitude of the location of the event' })
   @IsLongitude()
   long: number;
+  @Type(() => Date)
   @IsDate()
   date: Date;
   @ApiProperty({ description: 'capacity of the event' })

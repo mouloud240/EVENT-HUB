@@ -14,6 +14,9 @@ import { AuthService } from './auth.service';
 import { jwtGuard } from './guards/jwt.guard';
 import { loginReqDto } from './dto/login.req.dto';
 import { googleGuard } from './guards/google.guard';
+import { RefreshTokenDto } from './dto/refreshTokenDto';
+import { CreateAuthDto } from './dto/create-auth.dto';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,8 +26,8 @@ export class AuthController {
   login(@currentUser() user: user, @Body() body: loginReqDto) {
     return this.authServices.login(user);
   }
-  @Post('refresh')
-  refreshToken(@Body() body: { refreshToken: string }) {
+   @Post('refresh')
+  refreshToken(@Body() body: RefreshTokenDto) {
     return this.authServices.validateRefreshToken(body.refreshToken);
   }
 
@@ -41,6 +44,11 @@ export class AuthController {
   googleRedirect(@Req() req: any) {
     return this.authServices.googleLogin(req.user);
   }
+ @Post('register')
+  register(@Body() user: CreateUserDto) {
+    return this.authServices.register(user);
+  }
+
   @UseGuards(jwtGuard)
   @Delete()
   deleleUser(@currentUser() user: user) {

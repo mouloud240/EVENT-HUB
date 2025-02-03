@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { user } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -7,6 +12,8 @@ import { ConfigService } from '@nestjs/config';
 import { LoginResDto } from './dto/login.res.dto';
 import { refreshToken } from './dto/refreshToken.dto';
 import { Profile } from 'passport-google-oauth20';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,6 +21,19 @@ export class AuthService {
     private readonly jwtModule: JwtService,
     private readonly configService: ConfigService,
   ) {}
+  async register(user: CreateUserDto): Promise<LoginResDto> {
+    try {
+      const newUser = await this.userService.create(user);
+      return this.login(newUser);
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError)
+        throw new HttpException(
+          'User Already Exist Please login With your Email and Password',
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+  }
+
   async deleteUser(id: string) {
     return this.userService.remove(id);
   }
@@ -32,7 +52,6 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<user> {
     const user = await this.userService.findByEmail(email);
     if (!user) {
-      console.log('user not found');
       throw new UnauthorizedException('email or password is incorrect');
     }
     const isAuth = await bcrypt.compare(password, user.password);
@@ -63,7 +82,6 @@ export class AuthService {
     const payload = this.jwtModule.verify(token, {
       secret: this.configService.getOrThrow('REFRESH_TOKEN_SECRET'),
     });
-    console.log(payload);
     const newPayload = { id: payload.id };
     const newAccessToken = this.jwtModule.sign(newPayload, {
       secret: this.configService.getOrThrow('ACCESS_TOKEN_SECRET'),

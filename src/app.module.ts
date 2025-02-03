@@ -13,24 +13,29 @@ import { PassportModule } from '@nestjs/passport';
 import { LoggerMiddleware } from './auth/middlwares/logger.middleware';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { FileUploadService } from './file-upload/file-upload.service';
 
 @Module({
-  imports: [PassportModule,EventsModule, RsvpModule, UsersModule, IMailerModule, AuthModule,ConfigModule.forRoot(
-    {
-      isGlobal:true,
-    },
-  ),
+  imports: [
+    PassportModule,
+    EventsModule,
+    RsvpModule,
+    UsersModule,
+    IMailerModule,
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     PrismaModule,
+    ScheduleModule.forRoot(),
 
- ScheduleModule.forRoot(),
-
- SchedulerModule, 
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService, SchedulerService],
 })
-export class AppModule implements NestModule  {
-    configure(consumer: MiddlewareConsumer) {
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*');
-    }
+  }
 }

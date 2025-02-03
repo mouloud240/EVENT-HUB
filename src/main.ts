@@ -6,7 +6,7 @@ import * as passport from 'passport';
 import * as session from 'express-session';
 import helmet from 'helmet';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   //TODO change when using fastify
   app.use(helmet());
   //TODO change when using fastify
