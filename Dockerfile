@@ -1,74 +1,24 @@
-# syntax=docker/dockerfile:1
+# Use Node.js 20.11.1 base image
+FROM node:22-alpine
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
+# Set working directory
+WORKDIR /app
 
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-ARG NODE_VERSION=22
-ARG PNPM_VERSION=9.15.4
+# Install dependencies
+RUN npm cache clean --force
+RUN npm install --legacy-peer-deps
 
-################################################################################
-# Use node image for base image for all stages.
-FROM node:${NODE_VERSION}-alpine as base
-
-# Set working directory for all build stages.
-WORKDIR /usr/src/app
-
-# Install pnpm.
-RUN --mount=type=cache,target=/root/.npm \
-    npm install -g pnpm@${PNPM_VERSION}
-
-################################################################################
-# Create a stage for installing production dependecies.
-FROM base as deps
-
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.local/share/pnpm/store to speed up subsequent builds.
-# Leverage bind mounts to package.json and pnpm-lock.yaml to avoid having to copy them
-# into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
-    --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --prod --frozen-lockfile
-
-################################################################################
-# Create a stage for building the application.
-FROM deps as build
-
-# Download additional development dependencies before building, as some projects require
-# "devDependencies" to be installed to build. If you don't need this, remove this step.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
-    --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
-
-# Copy the rest of the source files into the image.
+# Copy the rest of the application code
 COPY . .
 
-################################################################################
-# Create a new stage to run the application with minimal runtime dependencies
-# where the necessary files are copied from the build stage.
-FROM base as final
+# Generate Prisma Client code
+RUN npx prisma generate
 
-# Use production node environment by default.
-ENV NODE_ENV production
-
-# Run the application as a non-root user.
-USER node
-
-# Copy package.json so that package manager commands can be used.
-COPY package.json .
-
-# Copy the production dependencies from the deps stage and also
-# the built application from the build stage into the image.
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist/main.js ./dist/main.js
-
-
-# Expose the port that the application listens on.
+# Expose the port the app runs on, here, I was using port 3333
 EXPOSE 3000
 
-# Run the application.
-CMD pnpm run start
+# Command to run the app
+CMD [  "npm", "run", "start:migrate:prod" ]
