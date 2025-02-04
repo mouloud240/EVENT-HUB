@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsDate,
   IsInt,
@@ -9,7 +9,6 @@ import {
   IsUUID,
   Min,
 } from 'class-validator';
-
 export class CreateEventDto {
   @ApiProperty({ description: 'name of the event' })
   @IsString({ message: 'name must be a string' })
@@ -33,4 +32,8 @@ export class CreateEventDto {
   @IsInt()
   @Min(1)
   capacity: number;
+}
+export class CreateEventDtoParsed{
+  @Transform(({ value }) => JSON.parse(value))
+  data: CreateEventDto;
 }

@@ -9,19 +9,13 @@ import { FileUploadService } from 'src/file-upload/file-upload.service';
   imports: [
     PrismaModule,
     FileUploadModule.register({
-      apiKey: 'AIzaSyAIJN12Q8p0oCBPQRE0jJqWnpgfYIeHq9w',
-
-      authDomain: 'taskmanager-91156.firebaseapp.com',
-
-      projectId: 'taskmanager-91156',
-
-      storageBucket: 'taskmanager-91156.appspot.com',
-
-      messagingSenderId: '248788476270',
-
-      appId: '1:248788476270:web:88772ea21ca7ee6a57e17f',
-
-      measurementId: 'G-VCJDM4MMSK',
+      apiKey: process.env.FILE_UPLOAD_API_KEY,
+      authDomain: process.env.FILE_UPLOAD_AUTH_DOMAIN,
+      projectId: process.env.FILE_UPLOAD_PROJECT_ID,
+      storageBucket: process.env.FILE_UPLOAD_STORAGE_BUCKET,
+      messagingSenderId: process.env.FILE_UPLOAD_MESSAGING_SENDER_ID,
+      appId: process.env.FILE_UPLOAD_APP_ID,
+      measurementId: process.env.FILE_UPLOAD_MEASUREMENT_ID,
     }),
   ],
   controllers: [EventsController],

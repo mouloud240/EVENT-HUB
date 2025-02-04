@@ -34,9 +34,15 @@ export class EventsController {
   @Post()
   @UseInterceptors(FileInterceptor('coverImage'))
   create(
-    @Body('data') createEventDto: string,
+    @Body('data', new JsonParsePipe()) createEventDto: string,
     @UploadedFile(
-         )
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({
+          maxSize: 1000000,
+          message: 'file size should be less than 1mb',
+        })
+        .build(),
+    )
     coverImage: Express.Multer.File,
     @currentUser() user: user,
   ): Promise<event> {
