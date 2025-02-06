@@ -3,7 +3,6 @@ import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { PrismaModule } from 'src/db/prisma.module';
 import { FileUploadModule } from 'src/file-upload/file-upload.module';
-import { FileUploadService } from 'src/file-upload/file-upload.service';
 
 @Module({
   imports: [

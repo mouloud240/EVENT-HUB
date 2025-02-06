@@ -30,7 +30,7 @@ export class EventsService {
 
   findAll(): Promise<Array<event>> {
     try {
-      return this.db.event.findMany({ include: { createdBy: true } });
+      return this.db.event.findMany({ include: { createdBy: false } });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -124,8 +124,17 @@ export class EventsService {
 
   async remove(id: string, userId: string): Promise<{ message: string }> {
     try {
-      const deleteResult = await this.db.event.delete({
+      const IsUserEvent = await this.db.event.count({
         where: { id: id, UserId: userId },
+      });
+      if (IsUserEvent === 0) {
+        throw new HttpException(
+          'You are not authorized to delete this event',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      const deleteResult = await this.db.event.delete({
+        where: { id: id },
       });
 
       if (!deleteResult) {
