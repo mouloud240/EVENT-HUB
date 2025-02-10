@@ -48,6 +48,7 @@ export class AuthController {
   @UseGuards(googleGuard)
   async googleRedirect(@Req() req: any, @Res() res: any) {
     const user = await this.authServices.googleLogin(req.user);
+    //ADDED FRONTEND URL
     const frontendRedirectUrl = `${this.ConfigService.get('FRONTEND_URL')}/login/google-redirect?accessToken=${user.AccessToken}&refreshToken=${user.RefreshToken}`;
     res.redirect(frontendRedirectUrl);
   }
