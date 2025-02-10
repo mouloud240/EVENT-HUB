@@ -1,4 +1,24 @@
-import from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  ParseFilePipeBuilder,
+  HttpStatus,
+  BadRequestException,
+  ValidationPipe,
+  Req,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -8,6 +28,8 @@ import { event, user } from '@prisma/client';
 import { PaginationDto, PaginationDtoRes } from 'src/rsvp/dto/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JsonParsePipe } from './pipes/parseJsonPipe';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 
 @UseGuards(jwtGuard)
 @Controller('events')
@@ -16,8 +38,10 @@ export class EventsController {
 
   @Post()
   @UseInterceptors(FileInterceptor('coverImage'))
-  create(
-    @Body('data', new JsonParsePipe()) createEventDto: string,
+  async create(
+    @Body('data')
+    rawData: string,
+
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addMaxSizeValidator({
@@ -29,16 +53,18 @@ export class EventsController {
     coverImage: Express.Multer.File,
     @currentUser() user: user,
   ): Promise<event> {
-    return this.eventsService.create(
-      JSON.parse(createEventDto),
-      user.id,
-      coverImage,
-    );
+    const createEventDto = plainToInstance(CreateEventDto, JSON.parse(rawData));
+    const error = await validate(createEventDto);
+    if (error.length > 0) {
+      throw new BadRequestException(error);
+    }
+
+    return this.eventsService.create(createEventDto, user.id, coverImage);
   }
 
   @Get()
-  findAll(): Promise<Array<event>> {
-    return this.eventsService.findAll();
+  findAll(@currentUser() user: user): Promise<Array<event>> {
+    return this.eventsService.findAll(user.id);
   }
   @Get('/pages')
   findAllPagination(
@@ -46,11 +72,15 @@ export class EventsController {
   ): Promise<PaginationDtoRes<event>> {
     return this.eventsService.findAllPagination(query);
   }
+  @Get('/user')
+  findAlluserEvents(@currentUser() user: user): Promise<Array<event>> {
+    return this.eventsService.findAlluserEvents(user.id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string): Promise<event> {
     return this.eventsService.findOne(id);
   }
-
   @Patch(':id')
   update(
     @Param('id') id: string,

@@ -14,8 +14,17 @@ import { googleGuard } from './guards/google.guard';
 import { SessionSerializer } from './sessionSerilizer';
 
 @Module({
-  imports:[UsersModule,PassportModule,JwtModule,ConfigModule.forRoot()],
+  imports: [UsersModule, PassportModule, JwtModule, ConfigModule.forRoot()],
   controllers: [AuthController],
-  providers: [AuthService,localGuard,LocalStrategy,testGuard,jwtStrategy,googleStrategy,googleGuard,SessionSerializer],
+  providers: [
+    AuthService,
+    localGuard,
+    LocalStrategy,
+    testGuard,
+    jwtStrategy,
+    googleStrategy,
+    googleGuard,
+    SessionSerializer,
+  ],
 })
 export class AuthModule {}

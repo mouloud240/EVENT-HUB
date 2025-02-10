@@ -58,9 +58,9 @@ export class RsvpService {
       COUNT(CASE WHEN r.status = 'ACCEPTED' THEN 1 END) AS accepted_rsvps_count,
       COUNT(CASE WHEN r."UserId" = ${userId} THEN 1 END) AS user_rsvp_count
     FROM 
-      events e
+      event e
     LEFT JOIN 
-      rsvps r ON e.id = r."EventId"
+      rsvp r ON e.id = r."EventId"
     WHERE 
       e.id = ${eventId}
     GROUP BY 
@@ -127,14 +127,26 @@ export class RsvpService {
 
   findAllUserRsvps(userID: string) {
     try {
-      return this.db.rsvp.findMany({ where: { UserId: userID } });
+      return this.db.rsvp.findMany({
+        where: { UserId: userID },
+        include: {
+          event: true,
+          user: true,
+        },
+      });
     } catch (error) {
       throw new HttpException(error, HttpStatus.NOT_FOUND);
     }
   }
   findAllEVentRsvps(eventID: string) {
     try {
-      return this.db.rsvp.findMany({ where: { EventId: eventID } });
+      return this.db.rsvp.findMany({
+        where: { EventId: eventID },
+        include: {
+          event: true,
+          user: true,
+        },
+      });
     } catch (error) {
       throw new HttpException(error, HttpStatus.NOT_FOUND);
     }
@@ -154,7 +166,7 @@ export class RsvpService {
       throw new HttpException(error, HttpStatus.NOT_FOUND);
     }
   }
-  async update(UpdateRsvpDto: UpdateRsvpDto, uid: string) {
+  async update(UpdateRsvpDto: UpdateRsvpDto, uid: string, id: string) {
     if (UpdateRsvpDto.status == rsvpStatus.ACCEPTED) {
       const queryRes = await this.db.event.findUnique({
         where: { id: UpdateRsvpDto.EventId },
@@ -183,9 +195,9 @@ export class RsvpService {
     try {
       const updatedCount = await this.db.rsvp.updateMany({
         where: {
-          EventId: UpdateRsvpDto.EventId,
-          UserId: uid,
+          id: id,
         },
+
         data: { status: UpdateRsvpDto.status },
       });
       if (updatedCount.count == 0) {

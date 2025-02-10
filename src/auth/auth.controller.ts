@@ -5,6 +5,7 @@ import {
   Get,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { localGuard } from './guards/local.guard';
@@ -26,7 +27,7 @@ export class AuthController {
   login(@currentUser() user: user, @Body() body: loginReqDto) {
     return this.authServices.login(user);
   }
-   @Post('refresh')
+  @Post('refresh')
   refreshToken(@Body() body: RefreshTokenDto) {
     return this.authServices.validateRefreshToken(body.refreshToken);
   }
@@ -34,17 +35,19 @@ export class AuthController {
   @Get('protected')
   @UseGuards(jwtGuard)
   getProtected(@currentUser() user: user) {
-    return user;
+    return this.authServices.getUserById(user.id);
   }
   @Get('google/login')
   @UseGuards(googleGuard)
   googleLogin() {}
   @Get('google/redirect')
   @UseGuards(googleGuard)
-  googleRedirect(@Req() req: any) {
-    return this.authServices.googleLogin(req.user);
+  async googleRedirect(@Req() req: any, @Res() res: any) {
+    const user = await this.authServices.googleLogin(req.user);
+    const frontendRedirectUrl = `http://localhost:3001/login/google-redirect?accessToken=${user.AccessToken}&refreshToken=${user.RefreshToken}`;
+    res.redirect(frontendRedirectUrl);
   }
- @Post('register')
+  @Post('register')
   register(@Body() user: CreateUserDto) {
     return this.authServices.register(user);
   }

@@ -8,6 +8,7 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateIf,
 } from 'class-validator';
 export class CreateEventDto {
   @ApiProperty({ description: 'name of the event' })
@@ -20,11 +21,13 @@ export class CreateEventDto {
   @IsString()
   city: string;
   @ApiProperty({ description: 'latitude of the location of the event' })
+  @ValidateIf((o) => o.lat !== undefined)
   @IsLatitude()
-  lat: number;
+  lat?: number;
   @ApiProperty({ description: 'longitude of the location of the event' })
+  @ValidateIf((o) => o.long !== undefined)
   @IsLongitude()
-  long: number;
+  long?: number;
   @Type(() => Date)
   @IsDate()
   date: Date;

@@ -21,6 +21,9 @@ export class AuthService {
     private readonly jwtModule: JwtService,
     private readonly configService: ConfigService,
   ) {}
+  async getUserById(id: string): Promise<user> {
+    return this.userService.findOne(id);
+  }
   async register(user: CreateUserDto): Promise<LoginResDto> {
     try {
       const newUser = await this.userService.create(user);

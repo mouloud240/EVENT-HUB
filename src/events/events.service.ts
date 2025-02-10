@@ -28,9 +28,14 @@ export class EventsService {
     }
   }
 
-  findAll(): Promise<Array<event>> {
+  findAll(uid: string): Promise<Array<event>> {
     try {
-      return this.db.event.findMany({ include: { createdBy: false } });
+      return this.db.event.findMany({
+        include: { createdBy: true },
+        where: {
+          UserId: { not: uid },
+        },
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -59,12 +64,13 @@ export class EventsService {
   }
   async findAlluserEvents(uid: string): Promise<Array<event>> {
     try {
+      console.log('Called');
       return this.db.event.findMany({
         where: { UserId: uid },
         include: { createdBy: true },
       });
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.I_AM_A_TEAPOT);
     }
   }
   async findAllUserEventsPagination(
@@ -96,6 +102,7 @@ export class EventsService {
 
   async findOne(id: string) {
     try {
+      console.log("I'm called", id);
       const event = await this.db.event.findUnique({
         where: {
           id: id,
@@ -103,7 +110,7 @@ export class EventsService {
         include: { createdBy: true },
       });
       if (!event) {
-        throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Event not founded', HttpStatus.NOT_FOUND);
       }
       return event;
     } catch (e) {

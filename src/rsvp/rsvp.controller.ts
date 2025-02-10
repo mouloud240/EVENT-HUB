@@ -85,8 +85,9 @@ export class RsvpController {
   update(
     @Param('id') id: string,
     @Body() updateRsvpDto: UpdateRsvpDto,
+    @currentUser() user: user,
   ): Promise<{ message: string }> {
-    return this.rsvpService.update(updateRsvpDto, id);
+    return this.rsvpService.update(updateRsvpDto, user.id,id);
   }
   @Patch('/user')
   updateAllUsersRsvp(

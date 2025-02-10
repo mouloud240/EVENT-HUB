@@ -23,7 +23,7 @@ export class ResInterceptor implements NestInterceptor {
     console.log(
       chalk.blue(`🔍 Request: ${chalk.bold(method)} ${chalk.green(url)}`),
     );
-    console.log(chalk.gray(`🛠 Headers:\n${JSON.stringify(headers, null, 2)}`));
+    console.log(chalk.gray(`🛠 Body:\n${JSON.stringify(headers, null, 2)}`));
 
     return next.handle().pipe(
       tap((response) => {

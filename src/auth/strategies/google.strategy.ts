@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import { VerifiedCallback } from 'passport-jwt';
+import { async } from 'rxjs';
 @Injectable()
 export class googleStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {

@@ -18,16 +18,17 @@ export default function () {
   const payload = JSON.stringify({
     email: user.email,
     password: user.password,
+    name: user.name,
   });
 
   const params = {
     headers: { 'Content-Type': 'application/json' },
   };
 
-  const res = http.post('http://localhost:3000/auth/login', payload, params);
+  const res = http.post('http://localhost:3000/auth/register', payload, params);
 
   check(res, {
-       'is status 201': (r) => r.status === 201,
+    'is status 201': (r) => r.status === 201,
   });
 
   sleep(1); // Simulate user waiting before sending another request

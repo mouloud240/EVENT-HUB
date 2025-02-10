@@ -13,6 +13,12 @@ async function bootstrap() {
   });
   //TODO change when using fastify
   app.use(helmet());
+  app.enableCors({
+    origin: 'https://eventhub-front-puag.vercel.app', // Allow frontend domain
+    credentials: true, // Allow cookies & auth headers
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
   //TODO change when using fastify
   app.use(
     session({
@@ -24,8 +30,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
   app.use(passport.initialize());
   app.use(passport.session());
-  app.useLogger(new Logger());
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+
+  app.useGlobalInterceptors(new ResInterceptor());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   const config = new DocumentBuilder()
     .setTitle('EVENTHUB')
     .setDescription('The EVENTHUB API description')
