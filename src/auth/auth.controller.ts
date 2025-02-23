@@ -16,7 +16,6 @@ import { jwtGuard } from './guards/jwt.guard';
 import { loginReqDto } from './dto/login.req.dto';
 import { googleGuard } from './guards/google.guard';
 import { RefreshTokenDto } from './dto/refreshTokenDto';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 
@@ -28,7 +27,7 @@ export class AuthController {
   ) {}
   @Post('login')
   @UseGuards(localGuard)
-  login(@currentUser() user: user, @Body() body: loginReqDto) {
+  login(@currentUser() user: user) {
     return this.authServices.login(user);
   }
   @Post('refresh')
