@@ -49,7 +49,7 @@ export class UsersService {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new HttpException(
           'User Already Exist Please login With your Email and Password',
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.EXPECTATION_FAILED,
         );
       }
     }

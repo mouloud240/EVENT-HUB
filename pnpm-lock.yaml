@@ -74,6 +74,9 @@ importers:
       multer:
         specifier: 1.4.5-lts.1
         version: 1.4.5-lts.1
+      nestjs-file-upload-handler:
+        specifier: link:../file_upload_lib
+        version: link:../file_upload_lib
       nodemailer:
         specifier: ^6.9.16
         version: 6.9.16

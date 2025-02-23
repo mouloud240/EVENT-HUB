@@ -7,9 +7,7 @@ import { IFirebaseConfig } from './interfaces/firebase.interface';
 export class FileUploadService {
   constructor(
     @Inject('CONFIG_OPTIONS') private readonly opts: IFirebaseConfig,
-  ) {
-    console.log('CONFIG_OPTIONS:', this.opts); // Debugging
-  }
+  ) {}
 
   firebaseConfig = this.opts;
   app = initializeApp(this.firebaseConfig);
