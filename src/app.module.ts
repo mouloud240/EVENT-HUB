@@ -13,7 +13,6 @@ import { PassportModule } from '@nestjs/passport';
 import { LoggerMiddleware } from './auth/middlwares/logger.middleware';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SchedulerModule } from './scheduler/scheduler.module';
-import { FileUploadService } from './file-upload/file-upload.service';
 
 @Module({
   imports: [

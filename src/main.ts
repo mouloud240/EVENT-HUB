@@ -14,7 +14,7 @@ async function bootstrap() {
   //TODO change when using fastify
   app.use(helmet());
   app.enableCors({
-    origin: 'https://eventhub-front-puag.vercel.app', // Allow frontend domain
+    origin: process.env.FRONTEND_URL, // Allow frontend domain
     credentials: true, // Allow cookies & auth headers
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',

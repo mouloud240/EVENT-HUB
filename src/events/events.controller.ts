@@ -10,14 +10,8 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
   ParseFilePipeBuilder,
-  HttpStatus,
   BadRequestException,
-  ValidationPipe,
-  Req,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -27,7 +21,6 @@ import { currentUser } from 'src/auth/decorators/getUser.decorator';
 import { event, user } from '@prisma/client';
 import { PaginationDto, PaginationDtoRes } from 'src/rsvp/dto/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { JsonParsePipe } from './pipes/parseJsonPipe';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 

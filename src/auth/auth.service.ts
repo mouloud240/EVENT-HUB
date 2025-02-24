@@ -14,6 +14,8 @@ import { refreshToken } from './dto/refreshToken.dto';
 import { Profile } from 'passport-google-oauth20';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { isHttpException } from './strategies/typeGuards/isHttpExeption';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -41,15 +43,32 @@ export class AuthService {
     return this.userService.remove(id);
   }
   async googleLogin(user: Profile) {
-    const userExist = await this.userService.findByGoogleId(user.id);
-    let newUser: user;
-    if (!userExist) {
-      newUser = await this.userService.createGoogleUser(user);
+    try {
+      const userWithGoogleMail = await this.userService.findByEmail(
+        user.emails[0].value,
+      );
+
+      //check if there is already a user with this email
+      if (!userWithGoogleMail) {
+        const newUser = await this.userService.createGoogleUser(user);
+        return this.login(newUser);
+      }
+      //check if user logged before with his googleId
+      const googleIdExists = userWithGoogleMail.googleId != null;
+      if (googleIdExists) {
+        return this.login(userWithGoogleMail);
+      }
+      // if there is a mail but no googleId we put it in the db
+      const updateUserDto = new UpdateUserDto();
+      updateUserDto.googleId = user.id;
+      await this.userService.update(userWithGoogleMail.id, updateUserDto);
+      return this.login(userWithGoogleMail);
+    } catch (error: unknown) {
+      if (isHttpException(error)) {
+        throw error;
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    if (!newUser) {
-      newUser = userExist;
-    }
-    return this.login(newUser);
   }
 
   async validateUser(email: string, password: string): Promise<user> {
